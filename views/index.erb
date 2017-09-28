@@ -1,1 +1,76 @@
-<h1>Hello World</h1>
+<h1 class="text-primary">Evacuspot Locator</h1>
+
+<form action="/list" method="get">
+  <div class="form-group">
+    <label>Mode of Transit</label>
+     <div class="radio">
+      <label class="radio-inline">
+        <input type="radio" name="travel_mode" id="optionsRadios1" value="WALKING" checked>
+        Walking
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="travel_mode" id="optionsRadios1" value="TRANSIT">
+        Public Transportation
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="travel_mode" id="optionsRadios1" value="DRIVING">
+        Driving
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="travel_mode" id="optionsRadios1" value="BICYCLING">
+        Bicycling
+      </label>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>Use this address or submit another address:</label>
+    <input id="user_address" type="text" name="user_addr" accept-charset="UTF-8" class="form-control">
+  </div>
+
+  <div class="form-group">
+     <input type="submit" text="Submit" class="btn btn-success btn-lg" value="Find Closest Evacuspots">
+  </div>
+</form>
+
+<br>
+<div id="map-container">
+  <div id="map"></div>
+</div>
+
+<script>
+  var map, mapOptions, geocoder;
+  var myLocation = {lat: <%= latitude %>, lng: <%= longitude %>};
+
+  function initMap(){
+    geocoder = new google.maps.Geocoder();
+
+    var map = new google.maps.Map(document.getElementById('map'), {
+      center: myLocation,
+      zoom: 13
+    });
+
+    locationAddress(geocoder, map);
+  }
+
+  function locationAddress(geocoder, map) {
+
+    var location = myLocation;
+    geocoder.geocode( { 'location': myLocation}, function(results, status) {
+
+      if (status == google.maps.GeocoderStatus.OK) {
+        console.log(results);
+        map.setCenter(results[0].geometry.location);
+        var marker = new google.maps.Marker({
+            map: map,
+            position: results[0].geometry.location
+        });
+        document.getElementById('user_address').value = results[0].formatted_address;
+      } else {
+        alert("Geocode was not successful for the following reason: " + status);
+      }
+    });
+  }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_MAPS_API_KEY'] %>&callback=initMap" async defer></script>
+
